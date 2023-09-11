@@ -17,6 +17,7 @@
 }
 .class-pages-list nav[data-group="page"] .item {
   padding: 5px;
+  white-space: nowrap;
 }
 .class-pages-list nav[data-group="subpage"] {
   border-style: hidden hidden groove hidden;
@@ -183,6 +184,7 @@
 }
 .class-pages-config .spells {
   overflow: auto;
+  flex: 1;
 }
 .class-pages-config .spells .label {
   font-weight: bold;
