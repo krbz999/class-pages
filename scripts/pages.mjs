@@ -1,7 +1,7 @@
 class ClassPages extends Application {
   static MODULE = "class-pages";
 
-  constructor(initial, subtab="class") {
+  constructor(initial, subtab = "class") {
     super();
     this.initial = initial;
     this.subtab = subtab;
@@ -205,9 +205,10 @@ class ClassPages extends Application {
   /**
    * Render this application.
    * @param {string} [initial=null]     The initial tab to render.
-   * @returns {ClassPages}       The rendered application.
+   * @param {string} [subtab=null]      An initial subtab to render ('class', 'subclasses', 'spells').
+   * @returns {ClassPages}              The rendered application.
    */
-  static show(initial = null, subtab=null) {
+  static show(initial = null, subtab = null) {
     const active = Object.values(ui.windows).find(w => w instanceof ClassPages);
     if (active) return active.render();
     return new ClassPages(initial, subtab).render(true);
@@ -253,6 +254,7 @@ class ClassPages extends Application {
     return buttons;
   }
 
+  /** Initialize the module. */
   static init() {
     Hooks.on("getSceneControlButtons", (array) => {
       const token = array.find(a => a.name === "token");
@@ -377,6 +379,7 @@ class ClassPagesPackSettings extends FormApplication {
     this.pages = pages;
   }
 
+  /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       template: "modules/class-pages/templates/pack-settings.hbs",
@@ -388,6 +391,7 @@ class ClassPagesPackSettings extends FormApplication {
     });
   }
 
+  /** @override */
   async getData() {
     return {
       model: this.model ??= new this.constructor._model({
@@ -402,6 +406,7 @@ class ClassPagesPackSettings extends FormApplication {
     };
   }
 
+  /** @override */
   async _updateObject() {
     const data = this.model.toObject();
     this.close();
@@ -411,6 +416,7 @@ class ClassPagesPackSettings extends FormApplication {
     this.pages.render();
   }
 
+  /** @override */
   async _onChangeInput(event) {
     const data = new FormDataExtended(this.form).object;
     for (const key of ["classes", "subclasses", "spells"]) {
@@ -421,6 +427,7 @@ class ClassPagesPackSettings extends FormApplication {
     this.render();
   }
 
+  /** @override */
   activateListeners(html) {
     super.activateListeners(html);
     html[0].querySelectorAll("[data-action=delete]").forEach(n => {
@@ -428,11 +435,19 @@ class ClassPagesPackSettings extends FormApplication {
     });
   }
 
+  /**
+   * Delete a form group.
+   * @param {PointerEvent} event
+   */
   async _onDelete(event) {
     event.currentTarget.closest(".form-group").remove();
     return this._onChangeInput(event);
   }
 
+  /**
+   * A data model instance.
+   * @type {DataModel}
+   */
   static get _model() {
     return class ClassPageSettingsModel extends foundry.abstract.DataModel {
       static defineSchema() {
@@ -454,6 +469,7 @@ class ClassPagesArtSettings extends FormApplication {
     this.pages = pages;
   }
 
+  /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       template: "modules/class-pages/templates/art-settings.hbs",
@@ -465,6 +481,7 @@ class ClassPagesArtSettings extends FormApplication {
     });
   }
 
+  /** @override */
   async getData() {
     const backdrops = game.settings.get(ClassPages.MODULE, "class-backdrops") ?? {};
     const labels = game.settings.get(ClassPages.MODULE, "subclass-labels") ?? {};
@@ -482,6 +499,7 @@ class ClassPagesArtSettings extends FormApplication {
     };
   }
 
+  /** @override */
   async _updateObject(event, data) {
     const {backdrops, labels} = foundry.utils.expandObject(data) ?? {};
     for (const [key, val] of Object.entries(backdrops ?? {})) if (!val) backdrops[key] = null;
@@ -494,6 +512,7 @@ class ClassPagesArtSettings extends FormApplication {
     this.pages.render();
   }
 
+  /** @override */
   async _onChangeInput(event) {
     const target = event.currentTarget;
     target.value = target.value.trim();
