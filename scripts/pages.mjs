@@ -115,7 +115,7 @@ export class ClassPages extends Application {
     const setting = game.settings.get(ClassPages.MODULE, "spell-lists") ?? {};
     for (const c of data.classes) {
       // Add all subclasses to the class.
-      c.subclasses = subclassIds[c.system.identifier].sort(nameSort);
+      c.subclasses = (subclassIds[c.system.identifier] ?? []).sort(nameSort);
 
       // Retrieve and enrich spell descriptions.
       const spellIds = setting[c.system.identifier] ?? [];
@@ -388,8 +388,9 @@ class ClassPagesPackSettings extends FormApplication {
     const data = this.model.toObject();
     this.close();
     for (const key of ["classes", "subclasses", "spells"]) {
-      game.settings.set(ClassPages.MODULE, `${key}-packs`, data[key].filter(u => u));
+      await game.settings.set(ClassPages.MODULE, `${key}-packs`, data[key].filter(u => u));
     }
+    this.pages.render();
   }
 
   async _onChangeInput(event) {
@@ -463,14 +464,15 @@ class ClassPagesArtSettings extends FormApplication {
   }
 
   async _updateObject(event, data) {
-    const {backdrops, labels} = foundry.utils.expandObject(data);
-    for (const [key, val] of Object.entries(backdrops)) if (!val) backdrops[key] = null;
-    for (const [key, val] of Object.entries(labels)) if (!val) labels[key] = null;
+    const {backdrops, labels} = foundry.utils.expandObject(data) ?? {};
+    for (const [key, val] of Object.entries(backdrops ?? {})) if (!val) backdrops[key] = null;
+    for (const [key, val] of Object.entries(labels ?? {})) if (!val) labels[key] = null;
 
-    return Promise.all([
+    await Promise.all([
       game.settings.set(ClassPages.MODULE, "class-backdrops", backdrops),
       game.settings.set(ClassPages.MODULE, "subclass-labels", labels)
     ]);
+    this.pages.render();
   }
 
   async _onChangeInput(event) {
