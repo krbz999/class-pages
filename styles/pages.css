@@ -1,0 +1,225 @@
+.class-pages-list {
+  min-width: 800px;
+  min-height: 400px;
+}
+.class-pages-list nav {
+  font-family: 'Modesto Condensed';
+  height: 30px;
+  align-items: center;
+  flex: none;
+}
+.class-pages-list nav .item {
+  flex: 1;
+}
+.class-pages-list nav[data-group="page"] {
+  font-size: 20px;
+  border-style: groove hidden;
+}
+.class-pages-list nav[data-group="page"] .item {
+  padding: 5px;
+}
+.class-pages-list nav[data-group="subpage"] {
+  border-style: hidden hidden groove hidden;
+  font-size: 25px;
+}
+.class-pages-list nav[data-group="subsubpage"] {
+  border-style: hidden hidden groove hidden;
+  font-size: 20px;
+}
+.class-pages-list nav[data-group="subsubpage"] .item {
+  padding: 6px 0;
+}
+.class-pages-list .page {
+  margin: 0 0.5rem 0 0;
+}
+.class-pages-list .content,
+.class-pages-list .page,
+.class-pages-list .subpage,
+.class-pages-list .subsubpage,
+.class-pages-list .tab[data-group].active {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.class-pages-list .tab[data-group="subpage"].active .class {
+  position: relative;
+}
+.class-pages-list .tab[data-group="subpage"].active .class .item {
+  display: flex;
+  justify-content: center;
+}
+.class-pages-list .tab[data-group="subpage"].active .subclass {
+  transition: 200ms;
+}
+.class-pages-list .tab[data-group="subpage"].active .subclass:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.class-pages-list .tab[data-group="subpage"].active .subclass .item {
+  display: flex;
+  gap: 1em;
+}
+.class-pages-list .tab[data-group="subpage"].active .description {
+  margin-top: 1rem;
+}
+.class-pages-list .tab[data-group="subpage"].active .subclass .description {
+  max-height: 600px;
+  overflow: auto;
+}
+.class-pages-list .tab[data-group="subpage"].active .class,
+.class-pages-list .tab[data-group="subpage"].active .subclass,
+.class-pages-list .tab[data-group="subpage"].active .spell-level {
+  border: 4px inset;
+  padding: 1rem;
+  margin: 0 1rem;
+}
+.class-pages-list .tab[data-group="subpage"].active .spell-level .spell {
+  padding: 2px 0;
+}
+.class-pages-list .tab[data-group="subpage"].active .spell-level .spell:nth-child(odd) h4[data-action] {
+  background: rgba(0, 0, 0, 0.05);
+}
+.class-pages-list .item .content-link {
+  border: none;
+  background: none;
+  font-family: 'Modesto Condensed';
+}
+.class-pages-list .class .item .content-link {
+  font-size: 100px;
+  height: 100px;
+}
+.class-pages-list .class .image {
+  position: absolute;
+}
+.class-pages-list .class .backdrop {
+  width: calc(100% + 2em + 4px);
+  left: calc(-1em - 2px);
+  top: calc(-1em - 2px);
+  -webkit-mask-image: linear-gradient(180deg, black 80%, transparent);
+  mask-image: linear-gradient(180deg, black 80%, transparent);
+  max-width: unset;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: 0 0;
+  border: none;
+  position: relative;
+  aspect-ratio: 2/1;
+}
+.class-pages-list .subclass .item .content-link {
+  font-size: 50px;
+  height: 100px;
+  align-items: center;
+  display: flex;
+}
+.class-pages-list .spell .item .content-link {
+  font-size: 20px;
+  height: 30px;
+}
+.class-pages-list .spell .image {
+  max-height: 30px;
+  max-width: 30px;
+  min-height: 30px;
+  min-width: 30px;
+}
+.class-pages-list .spell h4[data-action] {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  width: 100%;
+  cursor: pointer;
+}
+.class-pages-list .spell .item-summary {
+  font-size: 12px;
+  line-height: 16px;
+  padding: 0.25em 0.5em;
+  border-top: 1px solid #c9c7b8;
+  transition: 200ms;
+}
+.class-pages-list .spell .item-summary .item-properties {
+  margin-top: 3px;
+}
+.class-pages-list .spell .item-summary .item-properties .tag {
+  display: inline-block;
+  margin: 0 2px 0 0;
+  padding: 0 3px;
+  font-size: 10px;
+  line-height: 16px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+}
+.class-pages-list .image {
+  border: none;
+  border-radius: 5px;
+  pointer-events: none;
+  max-width: 100px;
+  min-width: 100px;
+  max-height: 100px;
+  min-height: 100px;
+}
+.class-pages-list .tab[data-group].active.class,
+.class-pages-list .tab[data-group].active.subclasses,
+.class-pages-list .tab[data-group].active.spell-level {
+  overflow: auto;
+  margin-top: 1rem;
+}
+
+/* SPELL LIST CONFIGURATION */
+.class-pages-config form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.class-pages-config .header {
+  display: flex;
+  border-bottom: 2px groove;
+}
+.class-pages-config .header .label {
+  font-weight: bold;
+  min-width: 5em;
+  max-width: 5em;
+  font-size: unset;
+  text-align: center;
+}
+.class-pages-config .spells {
+  overflow: auto;
+}
+.class-pages-config .spells .label {
+  font-weight: bold;
+  padding-left: 5px;
+}
+.class-pages-config .header > :first-child,
+.class-pages-config .spells .form-group > :first-child {
+  min-width: 10em;
+  max-width: 10em;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.class-pages-config .checkbox {
+  min-width: 5em;
+  max-width: 5em;
+  font-size: unset;
+  text-align: center;
+}
+.class-pages-config .form-group {
+  margin: 0;
+}
+.class-pages-config .form-group:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+.class-pages-config .form-group:not(:has(input:checked)) {
+  background-color: rgba(255, 0, 0, 0.15);
+}
+
+/* CLASS PAGES PACK SETTINGS */
+.class-pages-pack-settings .form-fields select {
+  flex: 1;
+}
+.class-pages-pack-settings .form-fields a {
+  flex: none;
+}
+
+/* CLASS PAGES ART SETTEINGS */
+.class-pages-art-settings .form-group label {
+  flex: 1;
+}

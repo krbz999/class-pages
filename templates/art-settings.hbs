@@ -1,0 +1,22 @@
+<form>
+  <p class="note">{{localize "CLASS_PAGES.ClassPagesSettingsArtHint"}}</p>
+  <section>
+    <h2>{{localize "CLASS_PAGES.ClassPagesSettingsBackdropsAndLabels"}}</h2>
+    {{#each classes}}
+    <div class="form-group">
+      <label>{{name}}</label>
+      <div class="form-fields">
+        <input type="text" name="labels.{{id}}" value="{{label}}" placeholder="{{localize 'CLASS_PAGES.ClassPagesSettingsSubclassLabel'}}">
+        <input type="text" name="{{formName}}" value="{{backdrop}}" placeholder="{{localize 'CLASS_PAGES.ClassPagesSettingsBackdrop'}}">
+        {{filePicker type="image" target=formName}}
+      </div>
+    </div>
+    {{/each}}
+  </section>
+
+  <footer>
+    <button type="submit">
+      <i class="fa-solid fa-save"></i> {{localize "Save"}}
+    </button>
+  </footer>
+</form>

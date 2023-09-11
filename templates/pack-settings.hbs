@@ -1,0 +1,65 @@
+<form>
+  <p class="note">{{localize "CLASS_PAGES.ClassPagesSettingsPackHint"}}</p>
+  <section class="classes">
+    <h2>{{localize "CLASS_PAGES.ClassPagesSettingsClasses"}}</h2>
+    {{#each model.classes}}
+    <div class="form-group">
+      <label>{{localize "CLASS_PAGES.ClassPagesSettingsCompendium"}}</label>
+      <div class="form-fields">
+        <select name="classes">{{selectOptions ../selectOptions selected=this blank="-"}}</select>
+        <a data-action="delete"><i class="fa-solid fa-trash"></i></a>
+      </div>
+    </div>
+    {{/each}}
+    <div class="form-group">
+      <label>{{localize "CLASS_PAGES.ClassPagesSettingsCompendium"}}</label>
+      <div class="form-fields">
+        <select name="classes">{{selectOptions selectOptions blank="-"}}</select>
+      </div>
+    </div>
+  </section>
+
+  <section class="subclasses">
+    <h2>{{localize "CLASS_PAGES.ClassPagesSettingsSubclasses"}}</h2>
+    {{#each model.subclasses}}
+    <div class="form-group">
+      <label>{{localize "CLASS_PAGES.ClassPagesSettingsCompendium"}}</label>
+      <div class="form-fields">
+        <select name="subclasses">{{selectOptions ../selectOptions selected=this blank="-"}}</select>
+        <a data-action="delete"><i class="fa-solid fa-trash"></i></a>
+      </div>
+    </div>
+    {{/each}}
+    <div class="form-group">
+      <label>{{localize "CLASS_PAGES.ClassPagesSettingsCompendium"}}</label>
+      <div class="form-fields">
+        <select name="subclasses">{{selectOptions selectOptions blank="-"}}</select>
+      </div>
+    </div>
+  </section>
+
+  <section class="spells">
+    <h2>{{localize "CLASS_PAGES.ClassPagesSettingsSpells"}}</h2>
+    {{#each model.spells}}
+    <div class="form-group">
+      <label>{{localize "CLASS_PAGES.ClassPagesSettingsCompendium"}}</label>
+      <div class="form-fields">
+        <select name="spells">{{selectOptions ../selectOptions selected=this blank="-"}}</select>
+        <a data-action="delete"><i class="fa-solid fa-trash"></i></a>
+      </div>
+    </div>
+    {{/each}}
+    <div class="form-group">
+      <label>{{localize "CLASS_PAGES.ClassPagesSettingsCompendium"}}</label>
+      <div class="form-fields">
+        <select name="spells">{{selectOptions selectOptions blank="-"}}</select>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <button type="submit">
+      <i class="fa-solid fa-save"></i> {{localize "Save"}}
+    </button>
+  </footer>
+</form>
