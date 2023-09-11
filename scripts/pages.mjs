@@ -1,9 +1,10 @@
-export class ClassPages extends Application {
+class ClassPages extends Application {
   static MODULE = "class-pages";
 
-  constructor(initial) {
+  constructor(initial, subtab="class") {
     super();
     this.initial = initial;
+    this.subtab = subtab;
   }
 
   /** @override */
@@ -188,7 +189,8 @@ export class ClassPages extends Application {
       tabs.push({
         group: id,
         navSelector: `[data-tab='${id}'] .tabs[data-group=subpage]`,
-        contentSelector: `[data-group=page][data-tab='${id}'] .subpage`
+        contentSelector: `[data-group=page][data-tab='${id}'] .subpage`,
+        initial: this.subtab
       }, {
         group: "spells",
         navSelector: `[data-group=page][data-tab='${id}'] .subpage .tabs[data-group=subsubpage]`,
@@ -205,10 +207,10 @@ export class ClassPages extends Application {
    * @param {string} [initial=null]     The initial tab to render.
    * @returns {ClassPages}       The rendered application.
    */
-  static show(initial = null) {
+  static show(initial = null, subtab=null) {
     const active = Object.values(ui.windows).find(w => w instanceof ClassPages);
     if (active) return active.render();
-    return new ClassPages(initial).render(true);
+    return new ClassPages(initial, subtab).render(true);
   }
 
   /** @override */
@@ -263,10 +265,14 @@ export class ClassPages extends Application {
         visible: true,
         onClick: () => {
           const [initial] = Object.keys(game.user.character?.classes ?? {});
-          return ClassPages.show(initial ?? null);
+          return ClassPages.show(initial ?? null, null);
         }
       });
     });
+
+    game.modules.get(ClassPages.MODULE).api = {
+      show: ClassPages.show
+    };
 
     for (const type of ["classes", "subclasses", "spells"]) {
       game.settings.register(ClassPages.MODULE, `${type}-packs`, {
