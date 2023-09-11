@@ -296,7 +296,17 @@ class ClassPagesConfig extends FormApplication {
       width: "auto",
       template: "modules/class-pages/templates/config.hbs",
       classes: ["class-pages-config"],
-      title: "CLASS_PAGES.ClassPagesConfig"
+      title: "CLASS_PAGES.ClassPagesConfig",
+      filters: [{inputSelector: "#spell-list-filter", contentSelector: ".spells"}],
+      id: "class-pages-config"
+    });
+  }
+
+  /** @override */
+  _onSearchFilter(event, query, rgx, html) {
+    html.querySelectorAll(".label").forEach(n => {
+      const show = !query || rgx.test(SearchFilter.cleanQuery(n.innerText));
+      n.closest(".form-group").style.display = show ? "" : "none";
     });
   }
 
@@ -342,6 +352,7 @@ class ClassPagesConfig extends FormApplication {
     html[0].querySelectorAll("[data-action=render]").forEach(n => {
       n.addEventListener("click", this._onClickRender.bind(this));
     });
+    html[0].querySelector("#spell-list-filter").addEventListener("focus", event => event.currentTarget.select());
   }
 
   /** @override */
@@ -366,7 +377,8 @@ class ClassPagesPackSettings extends FormApplication {
       classes: ["class-pages-pack-settings"],
       title: "CLASS_PAGES.ClassPagesPackSettings",
       width: 400,
-      height: "auto"
+      height: "auto",
+      id: "class-pages-pack-settings"
     });
   }
 
@@ -442,7 +454,8 @@ class ClassPagesArtSettings extends FormApplication {
       classes: ["class-pages-art-settings"],
       title: "CLASS_PAGES.ClassPagesArtSettings",
       width: 500,
-      height: "auto"
+      height: "auto",
+      id: "class-pages-art-settings"
     });
   }
 

@@ -6,6 +6,10 @@
     {{/each}}
   </div>
 
+  <div class="filter">
+    <input type="text" id="spell-list-filter" placeholder="{{localize 'CLASS_PAGES.Search'}}">
+  </div>
+
   <div class="spells">
     {{#each spells}}
     <div class="form-group stacked" data-uuid="{{uuid}}">

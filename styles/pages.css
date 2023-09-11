@@ -183,7 +183,7 @@
   text-align: center;
 }
 .class-pages-config .spells {
-  overflow: auto;
+  overflow: overlay;
   flex: 1;
 }
 .class-pages-config .spells .label {
