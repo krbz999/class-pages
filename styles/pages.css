@@ -2,6 +2,24 @@
   min-width: 800px;
   min-height: 400px;
 }
+.class-pages-list .class-nav {
+  display: flex;
+  border-style: groove;
+}
+.class-pages-list .class-nav button {
+  max-width: 3em;
+  margin: 0;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+}
+.class-pages-list .class-nav button:hover {
+  text-shadow: 0 0 5px var(--color-shadow-primary);
+}
+.class-pages-list .class-nav button:disabled {
+  color: gray;
+  text-shadow: none;
+}
 .class-pages-list nav {
   font-family: 'Modesto Condensed';
   height: 30px;
@@ -13,7 +31,11 @@
 }
 .class-pages-list nav[data-group="page"] {
   font-size: 20px;
-  border-style: groove hidden;
+  overflow: hidden;
+  border-right: groove;
+  border-left: groove;
+  flex: 1;
+  justify-content: flex-start;
 }
 .class-pages-list nav[data-group="page"] .item {
   padding: 5px;
@@ -221,7 +243,7 @@
   flex: none;
 }
 
-/* CLASS PAGES ART SETTEINGS */
+/* CLASS PAGES ART SETTINGS */
 .class-pages-art-settings .form-group label {
   flex: 1;
 }

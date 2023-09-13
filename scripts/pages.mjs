@@ -27,6 +27,30 @@ class ClassPages extends Application {
     html[0].querySelectorAll("[data-action='toggle-item']").forEach(n => {
       n.addEventListener("click", this._onToggleItem.bind(this));
     });
+    html[0].querySelectorAll(".class-nav [data-action]").forEach(n => {
+      n.addEventListener("click", this._onClickDirection.bind(this));
+    });
+  }
+
+  /**
+   * Handle clicking a directional button on the main tab navigation.
+   * @param {PointerEvent} event      The initiating click event.
+   * @returns {Tab}
+   */
+  _onClickDirection(event) {
+    const action = event.currentTarget.dataset.action;
+    const tabs = this._tabs[0]._nav.querySelectorAll("[data-tab]");
+    const first = tabs[0];
+    const last = tabs[tabs.length - 1];
+    const curr = this._tabs[0]._nav.querySelector(".active");
+    let next;
+    if (action === "left") {
+      next = curr.previousElementSibling ?? last;
+    } else {
+      next = curr.nextElementSibling ?? first;
+    }
+    next.scrollIntoView({behavior: "smooth"});
+    return this.activateTab(next.dataset.tab, {group: "page"});
   }
 
   /**
@@ -278,7 +302,7 @@ class ClassPages extends Application {
 
     for (const type of ["classes", "subclasses", "spells"]) {
       game.settings.register(ClassPages.MODULE, `${type}-packs`, {
-        type: Array, config: false, scope: "world"
+        scope: "world", config: false, type: Array, default: []
       });
     }
 

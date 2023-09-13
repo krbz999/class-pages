@@ -1,10 +1,14 @@
 <div class="content">
 
-  <nav class="sheet-tabs tabs" data-group="page" aria-role="Form Tab Navigation">
-    {{#each classes}}
-    <a class="item" data-tab="{{system.identifier}}">{{name}}</a>
-    {{/each}}
-  </nav>
+  <div class="class-nav">
+    <button data-action="left"><i class="fa-solid fa-arrow-left"></i></button>
+    <nav class="sheet-tabs tabs" data-group="page" aria-role="Form Tab Navigation">
+      {{#each classes}}
+      <a class="item" data-tab="{{system.identifier}}">{{name}}</a>
+      {{/each}}
+    </nav>
+    <button data-action="right"><i class="fa-solid fa-arrow-right"></i></button>
+  </div>
 
   <div class="page">
     {{#each classes}}
@@ -21,7 +25,6 @@
         <!-- Class page -->
         <div class="class tab" data-group="subpage" data-tab="class">
           <div class="class">
-            <!--<img class="image" src="{{img}}">-->
             {{#if backdrop}}<img class="backdrop" src="{{backdrop}}">{{/if}}
             <div class="item">
               <a class="content-link" draggable="true" data-uuid="{{uuid}}" data-id="{{id}}" data-pack="{{pack}}">
