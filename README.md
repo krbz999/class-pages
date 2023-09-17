@@ -5,3 +5,5 @@ When installed a 'wand' button is viewable in the left-hand side. This opens the
 <img src="https://i.imgur.com/AGJCqgL.png">
 
 The pages are automatically populated with every class, subclass, and spells from your compendiums that you add to the 'Sources' configuration menu. One page will be created for each class, with tabs for the class, the subclasses, and any spells you have marked as belonging to this class via the 'Spell Lists' menu.
+
+In the spell list configuration menu, you can filter by spell name, spell level (by writing "level:x"), and by spell school (by writing "school:key"). For example, "heal level:9 school:evo".

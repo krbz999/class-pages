@@ -5,14 +5,14 @@
     {{#each model.classes}}
     <div class="form-group">
       <div class="form-fields">
-        <select name="classes">{{selectOptions ../selectOptions selected=this blank="-"}}</select>
+        <select name="classes">{{selectOptions ../selectOptions selected=this blank="-" sort=true}}</select>
         <a data-action="delete"><i class="fa-solid fa-trash"></i></a>
       </div>
     </div>
     {{/each}}
     <div class="form-group">
       <div class="form-fields">
-        <select name="classes">{{selectOptions selectOptions blank="-"}}</select>
+        <select name="classes">{{selectOptions selectOptions blank="-" sort=true}}</select>
       </div>
     </div>
   </section>
@@ -22,14 +22,14 @@
     {{#each model.subclasses}}
     <div class="form-group">
       <div class="form-fields">
-        <select name="subclasses">{{selectOptions ../selectOptions selected=this blank="-"}}</select>
+        <select name="subclasses">{{selectOptions ../selectOptions selected=this blank="-" sort=true}}</select>
         <a data-action="delete"><i class="fa-solid fa-trash"></i></a>
       </div>
     </div>
     {{/each}}
     <div class="form-group">
       <div class="form-fields">
-        <select name="subclasses">{{selectOptions selectOptions blank="-"}}</select>
+        <select name="subclasses">{{selectOptions selectOptions blank="-" sort=true}}</select>
       </div>
     </div>
   </section>
@@ -39,14 +39,14 @@
     {{#each model.spells}}
     <div class="form-group">
       <div class="form-fields">
-        <select name="spells">{{selectOptions ../selectOptions selected=this blank="-"}}</select>
+        <select name="spells">{{selectOptions ../selectOptions selected=this blank="-" sort=true}}</select>
         <a data-action="delete"><i class="fa-solid fa-trash"></i></a>
       </div>
     </div>
     {{/each}}
     <div class="form-group">
       <div class="form-fields">
-        <select name="spells">{{selectOptions selectOptions blank="-"}}</select>
+        <select name="spells">{{selectOptions selectOptions blank="-" sort=true}}</select>
       </div>
     </div>
   </section>

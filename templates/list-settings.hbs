@@ -13,7 +13,9 @@
   <div class="spells">
     {{#each spells}}
     <div class="form-group stacked" data-uuid="{{uuid}}">
-      <a class="label" data-tooltip="{{name}}" data-action="render">{{name}}</a>
+      <a class="label" data-tooltip="{{name}}" data-action="render" data-school="{{system.school}}" data-level="{{system.level}}">
+        {{name}}
+      </a>
       {{#each classes as |has key|}}
       <label class="checkbox">
         <input type="checkbox" value="{{../uuid}}" name="{{key}}" {{checked has}}>

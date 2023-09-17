@@ -1,5 +1,5 @@
 .class-pages-list {
-  min-width: 800px;
+  min-width: 700px;
   min-height: 400px;
 }
 .class-pages-list .class-nav {
@@ -183,7 +183,7 @@
 .class-pages-list .tab[data-group].active.class,
 .class-pages-list .tab[data-group].active.subclasses,
 .class-pages-list .tab[data-group].active.spell-level {
-  overflow: auto;
+  overflow: overlay;
   margin-top: 1rem;
 }
 

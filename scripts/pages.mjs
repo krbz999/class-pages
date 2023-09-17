@@ -17,7 +17,7 @@ class ClassPages extends Application {
       template: "modules/class-pages/templates/pages.hbs",
       resizable: true,
       height: 1000,
-      width: 800
+      width: 700
     });
   }
 
@@ -402,8 +402,24 @@ class ClassPagesLists extends FormApplication {
 
   /** @override */
   _onSearchFilter(event, query, rgx, html) {
+    let match;
+
+    // level match
+    match = query?.match(new RegExp("level:([0-9]+)"));
+    const level = (match && match[1]) ? match[1] : null;
+    if (level) query = query.replace(match[0], "").trim();
+
+    // school match
+    match = query?.match(new RegExp("school:([a-z]+)"));
+    const school = (match && match[1]) ? match[1] : null;
+    if (school) query = query.replace(match[0], "").trim();
+
     html.querySelectorAll(".label").forEach(n => {
-      const show = !query || rgx.test(SearchFilter.cleanQuery(n.innerText));
+      let show = true;
+      if (level) show = show && (n.dataset.level == level);
+      if (school) show = show && (n.dataset.school === school);
+      if (query) show = show && new RegExp(query.toLowerCase().trim(), "i").test(SearchFilter.cleanQuery(n.innerText));
+
       n.closest(".form-group").style.display = show ? "" : "none";
     });
   }
@@ -418,10 +434,13 @@ class ClassPagesLists extends FormApplication {
   /** @override */
   async getData() {
     const keys = game.settings.get(ClassPages.MODULE, "spells-packs") ?? [];
-    const index = keys.reduce((acc, key) => {
-      const pack = game.packs.get(key);
-      if (!pack) return acc;
-      for (const idx of pack.index) if (idx.type === "spell") acc.push(idx);
+    const indices = await Promise.all(keys.map(key => game.packs.get(key)?.getIndex({
+      fields: ["system.school", "system.level"]
+    })));
+
+    const index = indices.reduce((acc, indice) => {
+      if (!indice) return acc;
+      for (const idx of indice) if (idx.type === "spell") acc.push(idx);
       return acc;
     }, []);
     const setting = game.settings.get(ClassPages.MODULE, "spell-lists") ?? {};
