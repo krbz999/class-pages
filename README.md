@@ -1,6 +1,6 @@
 Organize multiple compendiums of dnd5e classes, subclasses, and spells into one window where your players can see what is available to them.
 
-When installed a 'wand' button is viewable in the left-hand side. This opens the main pages. From here, the GM can change what sources are pulled from via the 'Sources' setting in the header, and change the look of the pages via the 'Art Settings' button. The 'Spell Lists' button opens a menu where the GM can toggle what spells belong to what class.
+When installed a 'wand' button is viewable in the left-hand side. This opens the main pages. A settings menu in the header lets a GM configure the sources that the classes, subclasses, and spells are pulled from, as well as configure the general look of the application, and the different spell lists per class.
 
 <img src="https://i.imgur.com/AGJCqgL.png">
 

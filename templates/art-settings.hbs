@@ -1,13 +1,13 @@
 <form>
-  <p class="note">{{localize "CLASS_PAGES.ClassPagesSettingsArtHint"}}</p>
+  <p class="note">{{localize "CLASS_PAGES.SettingsArtDetails"}}</p>
   <section>
-    <h2>{{localize "CLASS_PAGES.ClassPagesSettingsBackdropsAndLabels"}}</h2>
+    <h2>{{localize "CLASS_PAGES.SettingsArt"}}</h2>
     {{#each classes}}
     <div class="form-group">
       <label>{{name}}</label>
       <div class="form-fields">
-        <input type="text" name="labels.{{id}}" value="{{label}}" placeholder="{{localize 'CLASS_PAGES.ClassPagesSettingsSubclassLabel'}}">
-        <input type="text" name="{{formName}}" value="{{backdrop}}" placeholder="{{localize 'CLASS_PAGES.ClassPagesSettingsBackdrop'}}">
+        <input type="text" name="labels.{{id}}" value="{{label}}" placeholder="{{localize 'CLASS_PAGES.SettingsArtSubclassLabel'}}">
+        <input type="text" name="{{formName}}" value="{{backdrop}}" placeholder="{{localize 'CLASS_PAGES.SettingsArtClassBackdrop'}}">
         {{filePicker type="image" target=formName}}
       </div>
     </div>

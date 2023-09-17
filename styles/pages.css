@@ -188,50 +188,50 @@
 }
 
 /* SPELL LIST CONFIGURATION */
-.class-pages-config form {
+.class-pages-lists form {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
-.class-pages-config .header {
+.class-pages-lists .header {
   display: flex;
   border-bottom: 2px groove;
 }
-.class-pages-config .header .label {
+.class-pages-lists .header .label {
   font-weight: bold;
   min-width: 5em;
   max-width: 5em;
   font-size: unset;
   text-align: center;
 }
-.class-pages-config .spells {
+.class-pages-lists .spells {
   overflow: overlay;
   flex: 1;
 }
-.class-pages-config .spells .label {
+.class-pages-lists .spells .label {
   font-weight: bold;
   padding-left: 5px;
 }
-.class-pages-config .header > :first-child,
-.class-pages-config .spells .form-group > :first-child {
+.class-pages-lists .header > :first-child,
+.class-pages-lists .spells .form-group > :first-child {
   min-width: 10em;
   max-width: 10em;
   overflow: hidden;
   white-space: nowrap;
 }
-.class-pages-config .checkbox {
+.class-pages-lists .checkbox {
   min-width: 5em;
   max-width: 5em;
   font-size: unset;
   text-align: center;
 }
-.class-pages-config .form-group {
+.class-pages-lists .form-group {
   margin: 0;
 }
-.class-pages-config .form-group:nth-child(even) {
+.class-pages-lists .form-group:nth-child(even) {
   background-color: rgba(0, 0, 0, 0.15);
 }
-.class-pages-config .form-group:not(:has(input:checked)) {
+.class-pages-lists .form-group:not(:has(input:checked)) {
   background-color: rgba(255, 0, 0, 0.15);
 }
 
@@ -246,4 +246,10 @@
 /* CLASS PAGES ART SETTINGS */
 .class-pages-art-settings .form-group label {
   flex: 1;
+}
+
+/* GENERAL CLASS PAGES DIALOG */
+.class-pages-dialog .details:not(:first-child) {
+  border-top: 2px groove;
+  padding-top: 0.5em;
 }

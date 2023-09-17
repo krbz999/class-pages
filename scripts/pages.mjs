@@ -243,36 +243,10 @@ class ClassPages extends Application {
     const buttons = super._getHeaderButtons();
     if (game.user.isGM) {
       buttons.unshift({
-        class: "class-pages-config",
-        icon: "fa-solid fa-rectangle-list",
-        label: "CLASS_PAGES.ClassPagesConfig",
-        onclick: () => {
-          new ClassPagesConfig(this.classes, this).render(true);
-        }
-      }, {
-        class: "class-pages-config-backup",
-        icon: "fa-solid fa-download",
-        label: "CLASS_PAGES.ClassPagesConfigDownload",
-        onclick: () => {
-          const data = JSON.stringify(game.settings.get(ClassPages.MODULE, "spell-lists") ?? {});
-          const type = "application/json";
-          const name = "spell-list-backup-" + Date.now();
-          return saveDataToFile(data, type, name);
-        }
-      }, {
-        class: "class-pages-pack-settings",
+        class: "class-pages-configuration",
         icon: "fa-solid fa-cog",
-        label: "CLASS_PAGES.ClassPagesPackSettings",
-        onclick: () => {
-          new ClassPagesPackSettings(this.classes, this).render(true);
-        }
-      }, {
-        class: "class-pages-art-settings",
-        icon: "fa-solid fa-cog",
-        label: "CLASS_PAGES.ClassPagesArtSettings",
-        onclick: () => {
-          new ClassPagesArtSettings(this.classes, this).render(true);
-        }
+        onclick: () => new ClassPagesDialog(this.classes, this).render(true),
+        label: "CLASS_PAGES.Settings"
       });
     }
     return buttons;
@@ -314,8 +288,100 @@ class ClassPages extends Application {
   }
 }
 
+/* Utility dialog for rendering subapplications; spell list config, source config, art config, and download/upload. */
+class ClassPagesDialog extends Application {
+
+  constructor(classes, pages) {
+    super();
+    this.classes = classes;
+    this.pages = pages;
+  }
+
+  /** @override */
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "class-pages-dialog",
+      width: 400,
+      height: "auto",
+      template: "modules/class-pages/templates/settings-prompt.hbs",
+      title: "CLASS_PAGES.SettingsTitle",
+      classes: ["class-pages-dialog"]
+    });
+  }
+
+  /** @override */
+  activateListeners(html) {
+    super.activateListeners(html);
+    html[0].querySelectorAll("[data-action]").forEach(n => {
+      const action = n.dataset.action;
+      if (action === "packs") n.addEventListener("click", this._onClickPacks.bind(this));
+      else if (action === "art") n.addEventListener("click", this._onClickArt.bind(this));
+      else if (action === "lists") n.addEventListener("click", this._onClickLists.bind(this));
+      else if (action === "download") n.addEventListener("click", this._onClickDownload.bind(this));
+      else if (action === "override") {
+        const reader = new FileReader();
+        n.addEventListener("click", this._onClickUpload.bind(reader));
+        reader.addEventListener("load", this._onLoadOverride.bind(reader));
+      } else if (action === "merge") {
+        const reader = new FileReader();
+        n.addEventListener("click", this._onClickUpload.bind(reader));
+        reader.addEventListener("load", this._onLoadMerge.bind(reader));
+      }
+    });
+  }
+
+  /* -------------------- */
+  /* Click event handlers */
+  /* -------------------- */
+
+  _onClickPacks(event) {
+    new ClassPagesPackSettings(this.classes, this.pages).render(true);
+    this.close();
+  }
+
+  _onClickArt(event) {
+    new ClassPagesArtSettings(this.classes, this.pages).render(true);
+    this.close();
+  }
+
+  _onClickLists(event) {
+    new ClassPagesLists(this.classes, this.pages).render(true);
+    this.close();
+  }
+
+  _onClickDownload(event) {
+    const data = JSON.stringify(game.settings.get(ClassPages.MODULE, "spell-lists") ?? {});
+    const type = "application/json";
+    const name = "spell-list-backup-" + Date.now();
+    return saveDataToFile(data, type, name);
+  }
+
+  _onLoadMerge(event) {
+    const data = JSON.parse(this.result);
+    const current = game.settings.get(ClassPages.MODULE, "spell-lists") ?? {};
+    for (const key in current) {
+      const newData = new Set(data[key] ?? []);
+      const oldData = new Set(current[key] ?? []);
+      data[key] = Array.from(newData.union(oldData));
+    }
+    return game.settings.set(ClassPages.MODULE, "spell-lists", data);
+  }
+
+  _onLoadOverride(event) {
+    const data = JSON.parse(this.result);
+    return game.settings.set(ClassPages.MODULE, "spell-lists", data);
+  }
+
+  _onClickUpload(event) {
+    const reader = this;
+    const file = event.currentTarget.previousElementSibling.files.item(0);
+    if (!file) return;
+    reader.readAsText(file);
+  }
+}
+
 /* Utility class for configuring spell lists. */
-class ClassPagesConfig extends FormApplication {
+class ClassPagesLists extends FormApplication {
   constructor(classes = [], pages) {
     super();
     this.classes = classes;
@@ -326,11 +392,11 @@ class ClassPagesConfig extends FormApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       width: "auto",
-      template: "modules/class-pages/templates/config.hbs",
-      classes: ["class-pages-config"],
-      title: "CLASS_PAGES.ClassPagesConfig",
+      template: "modules/class-pages/templates/list-settings.hbs",
+      classes: ["class-pages-lists"],
+      title: "CLASS_PAGES.SettingsListsTitle",
       filters: [{inputSelector: "#spell-list-filter", contentSelector: ".spells"}],
-      id: "class-pages-config"
+      id: "class-pages-lists"
     });
   }
 
@@ -408,7 +474,7 @@ class ClassPagesPackSettings extends FormApplication {
     return foundry.utils.mergeObject(super.defaultOptions, {
       template: "modules/class-pages/templates/pack-settings.hbs",
       classes: ["class-pages-pack-settings"],
-      title: "CLASS_PAGES.ClassPagesPackSettings",
+      title: "CLASS_PAGES.SettingsPacksTitle",
       width: 400,
       height: "auto",
       id: "class-pages-pack-settings"
@@ -498,7 +564,7 @@ class ClassPagesArtSettings extends FormApplication {
     return foundry.utils.mergeObject(super.defaultOptions, {
       template: "modules/class-pages/templates/art-settings.hbs",
       classes: ["class-pages-art-settings"],
-      title: "CLASS_PAGES.ClassPagesArtSettings",
+      title: "CLASS_PAGES.SettingsArtTitle",
       width: 500,
       height: "auto",
       id: "class-pages-art-settings"
