@@ -321,11 +321,11 @@ class ClassPagesDialog extends Application {
       else if (action === "override") {
         const reader = new FileReader();
         n.addEventListener("click", this._onClickUpload.bind(reader));
-        reader.addEventListener("load", this._onLoadOverride.bind(reader));
+        reader.addEventListener("load", this._onLoadOverride.bind(this, reader));
       } else if (action === "merge") {
         const reader = new FileReader();
         n.addEventListener("click", this._onClickUpload.bind(reader));
-        reader.addEventListener("load", this._onLoadMerge.bind(reader));
+        reader.addEventListener("load", this._onLoadMerge.bind(this, reader));
       }
     });
   }
@@ -356,20 +356,26 @@ class ClassPagesDialog extends Application {
     return saveDataToFile(data, type, name);
   }
 
-  _onLoadMerge(event) {
-    const data = JSON.parse(this.result);
+  async _onLoadMerge(reader) {
+    const data = JSON.parse(reader.result);
     const current = game.settings.get(ClassPages.MODULE, "spell-lists") ?? {};
     for (const key in current) {
       const newData = new Set(data[key] ?? []);
       const oldData = new Set(current[key] ?? []);
       data[key] = Array.from(newData.union(oldData));
     }
-    return game.settings.set(ClassPages.MODULE, "spell-lists", data);
+    await game.settings.set(ClassPages.MODULE, "spell-lists", data);
+    ui.notifications.info("CLASS_PAGES.NotifyMerge", {localize: true});
+    this.close();
+    this.pages.render();
   }
 
-  _onLoadOverride(event) {
-    const data = JSON.parse(this.result);
-    return game.settings.set(ClassPages.MODULE, "spell-lists", data);
+  async _onLoadOverride(reader) {
+    const data = JSON.parse(reader.result);
+    await game.settings.set(ClassPages.MODULE, "spell-lists", data);
+    ui.notifications.info("CLASS_PAGES.NotifyOverride", {localize: true});
+    this.close();
+    this.pages.render();
   }
 
   _onClickUpload(event) {

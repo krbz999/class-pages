@@ -227,6 +227,7 @@
 }
 .class-pages-lists .form-group {
   margin: 0;
+  flex-wrap: unset;
 }
 .class-pages-lists .form-group:nth-child(even) {
   background-color: rgba(0, 0, 0, 0.15);

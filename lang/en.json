@@ -1,6 +1,8 @@
 {
   "CLASS_PAGES.Classes": "Classes",
   "CLASS_PAGES.ClassPages": "Class Pages",
+  "CLASS_PAGES.NotifyMerge": "The spell list was successfully merged.",
+  "CLASS_PAGES.NotifyOverride": "The spell list was successfully overridden.",
   "CLASS_PAGES.Search": "Search",
   "CLASS_PAGES.Settings": "Settings",
   "CLASS_PAGES.SettingsArt": "Art Settings",
