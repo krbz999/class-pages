@@ -94,11 +94,12 @@ class ClassPages extends Application {
       for (const idx of pack) {
         if (idx.type === itemType) {
           if (itemType === "class") {
-            if (classes.has(idx.system.identifier)) {
+            const id = idx.system?.identifier ?? idx.data?.identifier ?? "";
+            if (classes.has(id)) {
               console.warn(`Duplicate class identifiers found. The class '${idx.name}' with uuid '${idx.uuid}' was skipped.`);
               continue;
             } else {
-              classes.add(idx.system.identifier);
+              classes.add(id);
             }
           }
           acc.push(this._enrichData(idx));
@@ -125,8 +126,8 @@ class ClassPages extends Application {
 
     // Subclasses split by class identifier.
     const subclassIds = loaded[1].reduce((acc, idx) => {
-      const key = idx.system.classIdentifier;
-      if (!data.classes.some(c => c.system.identifier === key)) {
+      const key = idx.system?.classIdentifier ?? idx.data?.classIdentifier ?? "";
+      if (!data.classes.some(c => (c.system?.identifier ?? c.data?.identifier) === key)) {
         console.warn(`The subclass '${idx.name}' has no matching class with class identifier '${key}'.`);
         return acc;
       }
@@ -140,10 +141,11 @@ class ClassPages extends Application {
     const setting = game.settings.get(ClassPages.MODULE, "spell-lists") ?? {};
     for (const c of data.classes) {
       // Add all subclasses to the class.
-      c.subclasses = (subclassIds[c.system.identifier] ?? []).sort(nameSort);
+      const identifier = c.system?.identifier ?? c.data?.identifier;
+      c.subclasses = (subclassIds[identifier] ?? []).sort(nameSort);
 
       // Retrieve and enrich spell descriptions.
-      const spellIds = setting[c.system.identifier] ?? [];
+      const spellIds = setting[identifier] ?? [];
       const _spells = spellIds.reduce((acc, uuid) => {
         const idx = loaded[2].find(e => e.uuid === uuid);
         if (idx) acc.push(idx);
@@ -155,12 +157,12 @@ class ClassPages extends Application {
 
       // Push to array, partitioned by spell level.
       for (const spell of _spells) {
-        const {level, school} = spell.system;
+        const {level, school} = spell.system ?? spell.data ?? {};
         if (!(level in CONFIG.DND5E.spellLevels) || !(school in CONFIG.DND5E.spellSchools)) {
           console.warn(`The spell '${spell.name}' has an invalid spell school ('${school}') or spell level ('${level}').`);
           continue;
         }
-        c.spellLists[spell.system.level].spells.push(spell);
+        c.spellLists[level].spells.push(spell);
       }
 
       // Sort the spells.
@@ -184,15 +186,16 @@ class ClassPages extends Application {
     const desc = await TextEditor.enrichHTML(idx.system?.description.value ?? idx.data?.description.value ?? "");
     const data = {...idx, id: idx._id, desc, pack};
     if (idx.type === "class") {
-      const hasi18n = foundry.utils.getProperty(game.i18n.translations, `CLASS_PAGES.SubclassLabel${idx.system.identifier.capitalize()}`);
+      const identifier = idx.system?.identifier ?? idx.data?.identifier ?? "";
+      const hasi18n = foundry.utils.getProperty(game.i18n.translations, `CLASS_PAGES.SubclassLabel${identifier.capitalize()}`);
       let subclassLabel = hasi18n ? game.i18n.localize(hasi18n) : "Subclass";
       try {
-        const setting = game.settings.get(ClassPages.MODULE, "subclass-labels")[idx.system.identifier];
+        const setting = game.settings.get(ClassPages.MODULE, "subclass-labels")[identifier];
         if (setting) subclassLabel = setting;
       } catch (err) {}
       data.subclassLabel = subclassLabel;
       try {
-        data.backdrop = game.settings.get(ClassPages.MODULE, "class-backdrops")[idx.system.identifier];
+        data.backdrop = game.settings.get(ClassPages.MODULE, "class-backdrops")[identifier];
       } catch (err) {
         data.backdrop = false;
       }
@@ -209,7 +212,7 @@ class ClassPages extends Application {
       initial: this.initial
     }];
     for (const cls of data.classes) {
-      const id = cls.system.identifier;
+      const id = cls.system?.identifier ?? cls.data?.identifier ?? "";
       tabs.push({
         group: id,
         navSelector: `[data-tab='${id}'] .tabs[data-group=subpage]`,
@@ -453,8 +456,9 @@ class ClassPagesLists extends FormApplication {
 
     const classes = {};
     for (const c of this.classes) {
-      const list = setting[c.system.identifier] ?? [];
-      classes[c.system.identifier] = {list, label: c.name};
+      const identifier = c.system?.identifier ?? c.data?.identifier ?? "";
+      const list = setting[identifier] ?? [];
+      classes[identifier] = {list, label: c.name};
     }
 
     const spells = [];
@@ -602,7 +606,7 @@ class ClassPagesArtSettings extends FormApplication {
     const labels = game.settings.get(ClassPages.MODULE, "subclass-labels") ?? {};
     return {
       classes: this.classes.map(c => {
-        const id = c.system.identifier;
+        const id = c.system?.identifier ?? c.data?.identifier ?? "";
         return {
           id: id,
           name: c.name,
