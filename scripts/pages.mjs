@@ -183,7 +183,7 @@ class ClassPages extends Application {
   async _enrichData(idx) {
     const [_, scope, key] = idx.uuid.split(".");
     const pack = `${scope}.${key}`;
-    const desc = await TextEditor.enrichHTML(idx.system?.description.value ?? idx.data?.description.value ?? "");
+    const desc = await TextEditor.enrichHTML(idx.system?.description.value ?? idx.data?.description.value ?? "", {async: true});
     const data = {...idx, id: idx._id, desc, pack};
     if (idx.type === "class") {
       const identifier = idx.system?.identifier ?? idx.data?.identifier ?? "";

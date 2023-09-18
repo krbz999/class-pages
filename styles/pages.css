@@ -110,6 +110,7 @@
 .class-pages-list .class .item .content-link {
   font-size: 100px;
   height: 100px;
+  overflow: hidden;
 }
 .class-pages-list .class .image {
   position: absolute;
@@ -133,6 +134,7 @@
   height: 100px;
   align-items: center;
   display: flex;
+  overflow: hidden;
 }
 .class-pages-list .spell .item .content-link {
   font-size: 20px;
