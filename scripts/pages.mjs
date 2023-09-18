@@ -86,7 +86,7 @@ class ClassPages extends Application {
     const keys = game.settings.get(ClassPages.MODULE, `${type}-packs`) ?? [];
     const packs = keys.reduce((acc, key) => {
       const pack = game.packs.get(key);
-      if (pack) acc.push(pack.getIndex({fields: [...fields, "system.description.value"]}));
+      if (pack) acc.push(pack.getIndex({fields: [...fields, "system.description.value", "data.description.value"]}));
       return acc;
     }, []);
     const classes = new Set();
@@ -116,9 +116,9 @@ class ClassPages extends Application {
     const nameSort = (a, b) => a.name.localeCompare(b.name);
 
     const loaded = await Promise.all([
-      ["classes", ["system.identifier"], "class"],
-      ["subclasses", ["system.classIdentifier"], "subclass"],
-      ["spells", ["system.level", "system.school"], "spell"]
+      ["classes", ["system.identifier", "data.identifier"], "class"],
+      ["subclasses", ["system.classIdentifier", "data.classIdentifier"], "subclass"],
+      ["spells", ["system.level", "system.school", "data.level", "data.school"], "spell"]
     ].map(([type, fields, itemType]) => this._getIndex(type, fields, itemType)));
 
     this.classes = data.classes = loaded[0];
@@ -181,7 +181,7 @@ class ClassPages extends Application {
   async _enrichData(idx) {
     const [_, scope, key] = idx.uuid.split(".");
     const pack = `${scope}.${key}`;
-    const desc = await TextEditor.enrichHTML(idx.system.description.value);
+    const desc = await TextEditor.enrichHTML(idx.system?.description.value ?? idx.data?.description.value ?? "");
     const data = {...idx, id: idx._id, desc, pack};
     if (idx.type === "class") {
       const hasi18n = foundry.utils.getProperty(game.i18n.translations, `CLASS_PAGES.SubclassLabel${idx.system.identifier.capitalize()}`);
@@ -441,7 +441,7 @@ class ClassPagesLists extends FormApplication {
   async getData() {
     const keys = game.settings.get(ClassPages.MODULE, "spells-packs") ?? [];
     const indices = await Promise.all(keys.map(key => game.packs.get(key)?.getIndex({
-      fields: ["system.school", "system.level"]
+      fields: ["system.school", "system.level", "data.school", "data.level"]
     })));
 
     const index = indices.reduce((acc, indice) => {
