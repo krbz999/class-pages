@@ -5,20 +5,25 @@
 .class-pages-list .class-nav {
   display: flex;
   border-style: groove;
+  height: 4em;
+  justify-content: space-between;
 }
 .class-pages-list .class-nav button {
-  max-width: 3em;
   margin: 0;
   box-shadow: none;
   border: none;
   border-radius: 0;
+  min-width: 5em;
+  max-width: 5em;
 }
 .class-pages-list .class-nav button:hover {
   text-shadow: 0 0 5px var(--color-shadow-primary);
 }
-.class-pages-list .class-nav button:disabled {
-  color: gray;
-  text-shadow: none;
+.class-pages-list .class-nav button .fa-solid {
+  font-size: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .class-pages-list nav {
   font-family: 'Modesto Condensed';
@@ -29,27 +34,30 @@
 .class-pages-list nav .item {
   flex: 1;
 }
-.class-pages-list nav[data-group="page"] {
-  font-size: 20px;
+.class-pages-list .gallery {
   overflow: hidden;
   border-right: groove;
   border-left: groove;
   flex: 1;
-  justify-content: flex-start;
+  display: flex;
+  gap: 5px;
 }
-.class-pages-list nav[data-group="page"] .item {
-  padding: 5px;
-  white-space: nowrap;
+.class-pages-list .gallery img {
+  border: none;
+  border-radius: 0.5em;
+}
+.class-pages-list .gallery img:not(.active, :hover) {
+  filter: opacity(0.5) blur(1px) sepia(1);
 }
 .class-pages-list nav[data-group="subpage"] {
   border-style: hidden hidden groove hidden;
   font-size: 25px;
 }
-.class-pages-list nav[data-group="subsubpage"] {
+.class-pages-list nav[data-group="spells"] {
   border-style: hidden hidden groove hidden;
   font-size: 20px;
 }
-.class-pages-list nav[data-group="subsubpage"] .item {
+.class-pages-list nav[data-group="spells"] .item {
   padding: 6px 0;
 }
 .class-pages-list .page {
