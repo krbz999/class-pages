@@ -46,6 +46,9 @@
   border: none;
   border-radius: 0.5em;
 }
+.class-pages-list .gallery img:hover {
+  cursor: pointer;
+}
 .class-pages-list .gallery img:not(.active, :hover) {
   filter: opacity(0.5) blur(1px) sepia(1);
 }
