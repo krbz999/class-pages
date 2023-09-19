@@ -40,6 +40,12 @@
       "name": "English",
       "path": "lang/en.json",
       "flags": {}
+    },
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json",
+      "flags": {}
     }
   ],
   "description": "View your dnd5e world's available classes, subclasses, and spell lists in a single neat location.",
