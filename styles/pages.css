@@ -45,8 +45,6 @@
 .class-pages-list .gallery img {
   border: none;
   border-radius: 0.5em;
-}
-.class-pages-list .gallery img:hover {
   cursor: pointer;
 }
 .class-pages-list .gallery img:not(.active, :hover) {
