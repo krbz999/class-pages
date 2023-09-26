@@ -43,6 +43,42 @@ class ClassPages extends Application {
     html[0].querySelectorAll(".class-nav img[data-action]").forEach(n => {
       n.addEventListener("click", this._onClickClass.bind(this));
     });
+
+    const galleryElement = html[0].querySelector(".class-nav .gallery");
+    const debouncedScroll = foundry.utils.debounce((event) => this._onGalleryScroll(event, galleryElement), 50);
+    galleryElement.addEventListener("wheel", debouncedScroll);
+  }
+
+  /**
+   * Handle the scroll event for the class icons gallery.
+   * @param {WheelEvent} event        The scroll event.
+   * @param {HTMLElement} gallery     The gallery element containing the class icons.
+   */
+  _onGalleryScroll(event, gallery) {
+    if (!gallery) return;
+
+    const activeIcon = gallery.querySelector("img.active");
+    if (!activeIcon) return;
+
+    const direction = Math.sign(event.deltaY);
+    const nextIcon =
+      direction > 0
+        ? activeIcon.nextElementSibling || gallery.querySelector("img:first-child")
+        : activeIcon.previousElementSibling || gallery.querySelector("img:last-child");
+
+    if (nextIcon) {
+      nextIcon.scrollIntoView({ inline: "center" });
+      this.renderPageForClassIdentifier(nextIcon.dataset.id);
+    }
+  }
+
+  /**
+   * Render the page based on the class identifier.
+   * @param {string} classIdentifier      The identifier of the class to render.
+   * @returns {ClassPages}
+   */
+  renderPageForClassIdentifier(classIdentifier) {
+    return this.render(false, { classIdentifier });
   }
 
   /**
@@ -51,7 +87,7 @@ class ClassPages extends Application {
    * @returns {ClassPages}
    */
   _onClickClass(event) {
-    return this.render(false, {classIdentifier: event.currentTarget.dataset.id});
+    return this.renderPageForClassIdentifier(event.currentTarget.dataset.id);
   }
 
   /**
