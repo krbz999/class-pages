@@ -44,50 +44,41 @@ class ClassPages extends Application {
       n.addEventListener("click", this._onClickClass.bind(this));
     });
 
-    const galleryElement = html[0].querySelector(".class-nav .gallery");
-    const debouncedScroll = foundry.utils.debounce((event) => this._onGalleryScroll(event, galleryElement), 50);
-    galleryElement.addEventListener("wheel", debouncedScroll);
+    const debouncedScroll = foundry.utils.debounce(this._onGalleryScroll, 50);
+    html[0].querySelector(".class-nav .gallery").addEventListener("wheel", debouncedScroll.bind(this));
   }
 
   /**
    * Handle the scroll event for the class icons gallery.
-   * @param {WheelEvent} event        The scroll event.
-   * @param {HTMLElement} gallery     The gallery element containing the class icons.
+   * @param {WheelEvent} event      The scroll event.
+   * @returns {Promise<ClassPages|null>}
    */
-  _onGalleryScroll(event, gallery) {
-    if (!gallery) return;
-
-    const activeIcon = gallery.querySelector("img.active");
-    if (!activeIcon) return;
-
+  async _onGalleryScroll(event) {
+    const activeIcon = this.element[0].querySelector(".class-nav .gallery img.active");
     const direction = Math.sign(event.deltaY);
-    const nextIcon =
-      direction > 0
-        ? activeIcon.nextElementSibling || gallery.querySelector("img:first-child")
-        : activeIcon.previousElementSibling || gallery.querySelector("img:last-child");
-
-    if (nextIcon) {
-      nextIcon.scrollIntoView({ inline: "center" });
-      this.renderPageForClassIdentifier(nextIcon.dataset.id);
-    }
+    const [first, last] = activeIcon.parentNode.querySelectorAll("img:first-child, img:last-child");
+    let nextIcon = null;
+    if (direction > 0) nextIcon = activeIcon.nextElementSibling || first;
+    else nextIcon = activeIcon.previousElementSibling || last;
+    return nextIcon ? this.renderPage(nextIcon.dataset.id) : null;
   }
 
   /**
    * Render the page based on the class identifier.
    * @param {string} classIdentifier      The identifier of the class to render.
-   * @returns {ClassPages}
+   * @returns {Promise<ClassPages>}
    */
-  renderPageForClassIdentifier(classIdentifier) {
-    return this.render(false, { classIdentifier });
+  async renderPage(classIdentifier) {
+    return this.render(false, {classIdentifier});
   }
 
   /**
    * Handle clicking a specific class item in the top navigation.
    * @param {PointerEvent} event      The initiating click event.
-   * @returns {ClassPages}
+   * @returns {Promise<ClassPages>}
    */
   _onClickClass(event) {
-    return this.renderPageForClassIdentifier(event.currentTarget.dataset.id);
+    return this.renderPage(event.currentTarget.dataset.id);
   }
 
   /**
@@ -107,7 +98,7 @@ class ClassPages extends Application {
     } else {
       next = curr.nextElementSibling ?? first;
     }
-    return this.render(false, {classIdentifier: next.dataset.id});
+    return this.renderPage(next.dataset.id);
   }
 
   /**
