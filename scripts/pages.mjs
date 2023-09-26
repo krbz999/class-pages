@@ -43,69 +43,29 @@ class ClassPages extends Application {
     html[0].querySelectorAll(".class-nav img[data-action]").forEach(n => {
       n.addEventListener("click", this._onClickClass.bind(this));
     });
-    this.navScroller(html);
+    html[0].querySelector(".class-nav .gallery").addEventListener("wheel", this._onGalleryScroll.bind(this));
   }
 
   /**
-   * Activates the scroll functionality for the class icons gallery.
-   * @param {JQuery} html The HTML content of the rendered ClassPages application.
+   * Handle the scroll event for the class icons gallery.
+   * @param {WheelEvent} event - The scroll event.
    */
-  navScroller(html) {
-    const gallery = html[0].querySelector(".class-nav .gallery");
-    let isScrolling = false;
-
-    gallery.addEventListener(
-      "wheel",
-      function (event) {
-        if (isScrolling) return;
-
-        isScrolling = true;
-        const direction = Math.sign(event.deltaY);
-
-        if (direction > 0) {
-          this.scrollToNextIcon(gallery);
-        } else if (direction < 0) {
-          this.scrollToPreviousIcon(gallery);
-        }
-
-        setTimeout(() => {
-          isScrolling = false;
-        }, 100);
-      }.bind(this)
-    );
-  }
-
-  /**
-   * Scrolls to and activates the next icon in the gallery. If the current icon is the last one,
-   * it loops back to the first icon.
-   * @param {HTMLElement} gallery The gallery element containing the class icons.
-   */
-  scrollToNextIcon(gallery) {
+  _onGalleryScroll(event) {
+    const gallery = event.currentTarget;
+    const direction = Math.sign(event.deltaY);
     const activeIcon = gallery.querySelector("img.active");
-    let nextIcon =
-      activeIcon.nextElementSibling || gallery.querySelector("img:first-child");
+    let nextIcon;
+
+    if (direction > 0) {
+      nextIcon = activeIcon.nextElementSibling || gallery.querySelector("img:first-child");
+    } else {
+      nextIcon = activeIcon.previousElementSibling || gallery.querySelector("img:last-child");
+    }
 
     if (nextIcon) {
       nextIcon.scrollIntoView({ behavior: "smooth", inline: "center" });
       this._onClickClass({ currentTarget: nextIcon });
     }
-  }
-
-  /**
-   * Scrolls to and activates the previous icon in the gallery. If the current icon is the first one,
-   * it loops back to the last icon.
-   * @param {HTMLElement} gallery The gallery element containing the class icons.
-   */
-  scrollToPreviousIcon(gallery) {
-    const activeIcon = gallery.querySelector("img.active");
-    let previousIcon =
-      activeIcon.previousElementSibling ||
-      gallery.querySelector("img:last-child");
-
-    if (previousIcon) {
-      previousIcon.scrollIntoView({ behavior: "smooth", inline: "center" });
-      this._onClickClass({ currentTarget: previousIcon });
-    }    
   }
 
   /**
