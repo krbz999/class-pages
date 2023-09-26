@@ -55,6 +55,7 @@ class ClassPages extends Application {
    */
   async _onGalleryScroll(event) {
     const activeIcon = this.element[0].querySelector(".class-nav .gallery img.active");
+    if (!activeIcon) return null;
     const direction = Math.sign(event.deltaY);
     const [first, last] = activeIcon.parentNode.querySelectorAll("img:first-child, img:last-child");
     let nextIcon = null;
