@@ -43,15 +43,17 @@ class ClassPages extends Application {
     html[0].querySelectorAll(".class-nav img[data-action]").forEach(n => {
       n.addEventListener("click", this._onClickClass.bind(this));
     });
-    html[0].querySelector(".class-nav .gallery").addEventListener("wheel", this._onGalleryScroll.bind(this));
+    html[0].querySelector(".class-nav .gallery").addEventListener(
+      "wheel", debounce((event) => this._onGalleryScroll(event, html[0].querySelector(".class-nav .gallery")), 50)
+    );
   }
 
   /**
    * Handle the scroll event for the class icons gallery.
-   * @param {WheelEvent} event - The scroll event.
+   * @param {WheelEvent} event        The scroll event.
+   * @param {HTMLElement} gallery     The gallery element containing the class icons.
    */
-  _onGalleryScroll(event) {
-    const gallery = event.currentTarget;
+  _onGalleryScroll(event, gallery) {
     const direction = Math.sign(event.deltaY);
     const activeIcon = gallery.querySelector("img.active");
     let nextIcon;
