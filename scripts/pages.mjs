@@ -78,21 +78,22 @@ class ClassPages extends Application {
    * @param {PointerEvent} event      The initiating click event.
    * @returns {Promise<ClassPages>}
    */
-  _onClickClass(event) {
+  async _onClickClass(event) {
     return this.renderPage(event.currentTarget.dataset.id);
   }
 
   /**
    * Handle clicking a directional button on the main tab navigation.
    * @param {PointerEvent} event      The initiating click event.
-   * @returns {ClassPages}
+   * @returns {Promise<ClassPages|null>}
    */
-  _onClickDirection(event) {
+  async _onClickDirection(event) {
     const action = event.currentTarget.dataset.action;
     const nav = event.currentTarget.closest(".class-nav");
     const first = nav.querySelector("img:first-child");
     const last = nav.querySelector("img:last-child");
     const curr = nav.querySelector("img.active");
+    if (!curr) return null;
     let next;
     if (action === "left") {
       next = curr.previousElementSibling ?? last;
