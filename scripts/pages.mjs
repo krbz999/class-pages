@@ -138,6 +138,7 @@ class ClassPages extends Application {
       ]
     }) ?? []));
     classes = classes.flatMap(c => Array.from(c)).reduce((acc, c) => {
+      if (c.type !== "class") return acc;
       const id = c.system?.identifier ?? c.data?.identifier;
       if (!id || acc.set.has(id)) {
         console.warn(`Missing or duplicate class identifier found. The class '${c.name}' with uuid '${c.uuid}' was skipped.`);
@@ -161,8 +162,10 @@ class ClassPages extends Application {
         "system.description.value", "data.description.value"
       ]
     }) ?? []));
-    subclasses = subclasses.flatMap(s => Array.from(s)).filter(s => (s.system?.classIdentifier ?? s.data?.classIdentifier) === identifier);
-    subclasses.sort(nameSort);
+    subclasses = subclasses.flatMap(s => Array.from(s)).filter(s => {
+      if (s.type !== "subclass") return false;
+      return (s.system?.classIdentifier ?? s.data?.classIdentifier) === identifier;
+    }).sort(nameSort);
 
     // Find all its spells.
     const spellPacks = game.settings.get(ClassPages.MODULE, "spells-packs") ?? [];
@@ -173,7 +176,7 @@ class ClassPages extends Application {
       ]
     }) ?? []));
     const spellUuids = game.settings.get(ClassPages.MODULE, "spell-lists")?.[identifier] ?? [];
-    spells = spells.flatMap(s => Array.from(s)).filter(s => spellUuids.includes(s.uuid));
+    spells = spells.flatMap(s => Array.from(s)).filter(s => (s.type === "spell") && spellUuids.includes(s.uuid));
     spells.sort(nameSort);
 
     // Construct data object.
