@@ -1,8 +1,11 @@
 <form>
   <div class="header">
-    <div class="empty"></div>
+    <label class="checkbox" data-tooltip="CLASS_PAGES.SpellcastingHint">
+      <input type="checkbox" class="prog">
+      {{localize "CLASS_PAGES.Spellcasting"}}
+    </label>
     {{#each classes}}
-    <div class="label" data-tooltip="{{name}}">{{name}}</div>
+    <div class="label class" data-identifier="{{identifier}}" data-tooltip="{{name}}" {{#if prog}}data-prog="true"{{/if}}>{{name}}</div>
     {{/each}}
   </div>
 
@@ -16,9 +19,9 @@
       <a class="label" data-tooltip="{{name}}" data-action="render" data-school="{{system.school}}" data-level="{{system.level}}">
         {{name}}
       </a>
-      {{#each classes as |has key|}}
-      <label class="checkbox">
-        <input type="checkbox" value="{{../uuid}}" name="{{key}}" {{checked has}}>
+      {{#each classes as |cls key|}}
+      <label class="checkbox spell">
+        <input type="checkbox" value="{{../uuid}}" name="{{key}}" {{checked cls.has}} {{#if cls.prog}}data-prog="true"{{/if}}>
       </label>
       {{/each}}
     </div>

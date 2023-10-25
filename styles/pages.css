@@ -167,7 +167,8 @@
   line-height: 16px;
   padding: 0.25em 0.5em;
   border-top: 1px solid #c9c7b8;
-  transition: 200ms;
+  transition: height 250ms;
+  overflow: hidden;
 }
 .class-pages-list .spell .item-summary .item-properties {
   margin-top: 3px;
@@ -199,6 +200,9 @@
 }
 
 /* SPELL LIST CONFIGURATION */
+.class-pages-lists {
+  width: auto !important;
+}
 .class-pages-lists form {
   display: flex;
   flex-direction: column;
@@ -245,6 +249,10 @@
 }
 .class-pages-lists .form-group:not(:has(input:checked)) {
   background-color: rgba(255, 0, 0, 0.15);
+}
+.class-pages-lists:has(.header .prog:checked) label.spell:not(:has([data-prog])),
+.class-pages-lists:has(.header .prog:checked) .label.class:not([data-prog]) {
+  display: none !important;
 }
 
 /* CLASS PAGES PACK SETTINGS */

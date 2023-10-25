@@ -13,7 +13,7 @@
   <div class="page">
     <nav class="sheet-tabs tabs" data-group="subpage" aria-role="Form Tab Navigation">
       <a class="item" data-tab="class">{{class.name}}</a>
-      <a class="item" data-tab="subclasses">{{subclassLabel}}</a>
+      <a class="item" data-tab="subclasses">{{localize subclassLabel}}</a>
       {{#if spells.length}}<a class="item" data-tab="spells">{{localize "CLASS_PAGES.SpellLists"}}</a>{{/if}}
     </nav>
 
@@ -55,11 +55,17 @@
           {{/each}}
         </nav>
 
+        <div class="schools">
+          {{#each schools}}
+          <label class="checkbox"><input type="checkbox" data-school="{{@key}}">{{this}}</label>
+          {{/each}}
+        </div>
+
         <div class="subsubpage">
           {{#each spells}}
           <div class="tab spell-level" data-group="spells" data-tab="spell{{level}}">
             {{#each spells}}
-            <div class="spell">
+            <div class="spell" data-level="{{level}}" data-school="{{school}}">
               <h4 data-uuid="{{uuid}}" data-action="toggle-item">
                 <img class="image" src="{{img}}">
                 <div class="item">

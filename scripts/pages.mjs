@@ -1,20 +1,23 @@
 class ClassPages extends Application {
   static MODULE = "class-pages";
 
+  _schools = new Set();
+
+  /* -------------------------------------- */
+  /*                                        */
+  /*               OVERRIDES                */
+  /*                                        */
+  /* -------------------------------------- */
+
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "class-pages",
       classes: ["class-pages-list"],
-      tabs: [{
-        group: "class",
-        navSelector: "nav[data-group=subpage]",
-        contentSelector: ".subpage"
-      }, {
-        group: "spells",
-        navSelector: "nav[data-group=spells]",
-        contentSelector: ".subsubpage"
-      }],
+      tabs: [
+        {group: "class", navSelector: "nav[data-group=subpage]", contentSelector: ".subpage"},
+        {group: "spells", navSelector: "nav[data-group=spells]", contentSelector: ".subsubpage"}
+      ],
       scrollY: [],
       title: "CLASS_PAGES.ClassPages",
       template: "modules/class-pages/templates/pages.hbs",
@@ -46,6 +49,186 @@ class ClassPages extends Application {
 
     const debouncedScroll = foundry.utils.debounce(this._onGalleryScroll, 50);
     html[0].querySelector(".class-nav .gallery").addEventListener("wheel", debouncedScroll.bind(this));
+
+    html[0].querySelectorAll(".spells .schools [data-school]").forEach(n => {
+      n.addEventListener("change", this._onChangeSchoolFilter.bind(this));
+    });
+  }
+
+  /** @override */
+  async getData(options = {}) {
+    // Find the current class and filter out any duplicate classes.
+    const classes = await this._getClasses();
+    const defaultIdentifier = classes[0]?.system.identifier ?? classes[0]?.data.identifier;
+    const identifier = options.classIdentifier ?? defaultIdentifier;
+    const cls = classes.find(c => (c.system?.identifier ?? c.data?.identifier) === identifier) ?? classes[0];
+
+    if (!cls) return {};
+
+    // Find all its subclasses.
+    const subclasses = await this._getSubclasses(identifier);
+
+    // Find all its spells.
+    const spells = await this._getSpells(identifier);
+
+    // Construct data object.
+    const data = {
+      class: await this._enrichData(cls),
+      identifier: identifier,
+      subclasses: subclasses,
+      spells: spells,
+      classes: this.classes = classes, // used by subapps
+      subclassLabel: "CLASS_PAGES.Subclass",
+      backdrop: false,
+      schools: CONFIG.DND5E.spellSchools
+    };
+
+    // Get subclass label.
+    const label = `CLASS_PAGES.SubclassLabel${identifier.capitalize()}`;
+    const labelSetting = game.settings.get(ClassPages.MODULE, "subclass-labels")?.[identifier];
+    if (labelSetting) data.subclassLabel = labelSetting;
+    else if (game.i18n.has(label)) data.subclassLabel = label;
+
+    // Get backdrop for this class.
+    const backdrops = game.settings.get(ClassPages.MODULE, "class-backdrops") ?? {};
+    if (backdrops[identifier]) data.backdrop = backdrops[identifier];
+
+    return data;
+  }
+
+  /**
+   * Get classes available to present in the pages.
+   * @returns {Promise<object[]>}     An array of index entries.
+   */
+  async _getClasses() {
+    const classPacks = game.settings.get(ClassPages.MODULE, "classes-packs") ?? [];
+    let classes = await Promise.all(classPacks.map(p => game.packs.get(p)?.getIndex({
+      fields: [
+        "system.identifier", "data.identifier",
+        "system.description.value", "data.description.value",
+        "system.spellcasting.progression", "data.spellcasting.progression"
+      ]
+    }) ?? []));
+    classes = classes.flatMap(c => Array.from(c)).reduce((acc, c) => {
+      if (c.type !== "class") return acc;
+      const id = c.system?.identifier ?? c.data?.identifier;
+      if (!id || acc.set.has(id)) {
+        console.warn(`Missing or duplicate class identifier found. The class '${c.name}' with uuid '${c.uuid}' was skipped.`);
+        return acc;
+      }
+      c.identifier = id;
+      acc.classes.push(c);
+      acc.set.add(id);
+      return acc;
+    }, {set: new Set(), classes: []}).classes.sort((a, b) => a.name.localeCompare(b.name));
+    return classes;
+  }
+
+  /**
+   * Get subclasses available for the current class.
+   * @param {string} identifier       Class identifier.
+   * @returns {Promise<object[]>}     An array of index entries.
+   */
+  async _getSubclasses(identifier) {
+    const subclassPacks = game.settings.get(ClassPages.MODULE, "subclasses-packs") ?? [];
+    let subclasses = await Promise.all(subclassPacks.map(p => game.packs.get(p)?.getIndex({
+      fields: [
+        "system.classIdentifier", "data.classIdentifier",
+        "system.description.value", "data.description.value"
+      ]
+    }) ?? []));
+    subclasses = subclasses.flatMap(s => Array.from(s)).filter(s => {
+      if (s.type !== "subclass") return false;
+      return (s.system?.classIdentifier ?? s.data?.classIdentifier) === identifier;
+    }).sort((a, b) => a.name.localeCompare(b.name));
+    return Promise.all(subclasses.map(s => this._enrichData(s)));
+  }
+
+  /**
+   * Get all spells available for the current class.
+   * @param {string} identifier       Class identifier.
+   * @returns {Promise<object[]>}     Spell list objects sorted by spell level.
+   */
+  async _getSpells(identifier) {
+    const spellPacks = game.settings.get(ClassPages.MODULE, "spells-packs") ?? [];
+    let spells = await Promise.all(spellPacks.map(p => game.packs.get(p)?.getIndex({
+      fields: [
+        "system.school", "data.school",
+        "system.level", "data.level"
+      ]
+    }) ?? []));
+    const spellUuids = game.settings.get(ClassPages.MODULE, "spell-lists")?.[identifier] ?? [];
+    spells = spells.flatMap(s => Array.from(s)).filter(s => (s.type === "spell") && spellUuids.includes(s.uuid));
+    spells.sort((a, b) => a.name.localeCompare(b.name));
+    spells = await Promise.all(spells.map(s => this._enrichData(s, false)));
+    spells = spells.reduce((acc, spell) => {
+      const level = spell.system?.level ?? spell.data?.level;
+      if (!Number.isNumeric(level) || !(level in CONFIG.DND5E.spellLevels)) return acc;
+      const school = spell.system?.school ?? spell.data?.school;
+      spell.level = level;
+      spell.school = (school in CONFIG.DND5E.spellSchools) ? school : null;
+      acc[level] ??= {level: level, label: CONFIG.DND5E.spellLevels[level], spells: []};
+      acc[level].spells.push(spell);
+      return acc;
+    }, {});
+    spells = Object.values(spells).sort((a, b) => Number(a.level) - Number(b.level));
+    return spells;
+  }
+
+  /**
+   * Utility function to batch construct and enrich an index entry.
+   * @param {object} idx                      One entry from a compendium's index.
+   * @param {boolean} [description=true]      Enrich the description?
+   * @returns {Promise<object>}               A different object with more data.
+   */
+  async _enrichData(idx, description = true) {
+    const [_, scope, key] = idx.uuid.split(".");
+    const pack = `${scope}.${key}`;
+    let desc = null;
+    if (description) {
+      const value = idx.system?.description?.value ?? idx.data?.description?.value ?? "";
+      desc = await TextEditor.enrichHTML(value, {async: true});
+    }
+    return {...idx, id: idx._id, desc, pack};
+  }
+
+  /** @override */
+  async render(force = false, options = {}) {
+    this.options.classIdentifier ??= options.classIdentifier ?? null;
+    this.options.subtab ??= options.subtab ?? null;
+    this._schools = new Set();
+    return super.render(force, options);
+  }
+
+  /** @override */
+  _getHeaderButtons() {
+    const buttons = super._getHeaderButtons();
+    if (game.user.isGM) {
+      buttons.unshift({
+        class: "class-pages-configuration",
+        icon: "fa-solid fa-cog",
+        onclick: () => new ClassPagesDialog(this.classes, this).render(true),
+        label: "CLASS_PAGES.Settings"
+      });
+    }
+    return buttons;
+  }
+
+  /* -------------------------------------- */
+  /*                                        */
+  /*             EVENT HANDLERS             */
+  /*                                        */
+  /* -------------------------------------- */
+
+  _onChangeSchoolFilter(event) {
+    const school = event.currentTarget.dataset.school;
+    if (this._schools.has(school)) this._schools.delete(school);
+    else this._schools.add(school);
+
+    event.currentTarget.closest(".spells.tab").querySelectorAll(".spell[data-school]").forEach(n => {
+      const vis = !this._schools.size || this._schools.has(n.dataset.school);
+      n.style.display = vis ? "block" : "none";
+    });
   }
 
   /**
@@ -110,130 +293,32 @@ class ClassPages extends Application {
   async _onToggleItem(event) {
     const target = event.currentTarget;
     if (event.target.closest(".content-link, .item")) return;
+    const expanded = target.classList.toggle("expanded");
     const uuid = target.dataset.uuid;
-    if (target.classList.contains("expanded")) {
+    if (!expanded) {
       const summary = target.parentNode.querySelector(".item-summary");
-      if (summary) summary.remove();
+      if (summary) {
+        await summary.animate([{height: 0}], {duration: 200, iterations: 1}).finished;
+        summary.remove();
+      }
     } else {
       const item = await fromUuid(uuid);
       const data = await item.getChatData();
       const div = document.createElement("DIV");
       div.innerHTML = await renderTemplate("systems/dnd5e/templates/items/parts/item-summary.hbs", data);
       div.firstElementChild.setAttribute("data-uuid", uuid);
+      div.firstElementChild.style.height = 0;
       target.after(div.firstElementChild);
+      const elem = target.closest(".spell").querySelector(".item-summary");
+      elem.style.height = `${elem.scrollHeight}px`;
     }
-    target.classList.toggle("expanded");
   }
 
-  /** @override */
-  async getData(options = {}) {
-    const nameSort = (a, b) => a.name.localeCompare(b.name);
-
-    // Find the current class and filter out any duplicate classes.
-    const classPacks = game.settings.get(ClassPages.MODULE, "classes-packs") ?? [];
-    let classes = await Promise.all(classPacks.map(p => game.packs.get(p)?.getIndex({
-      fields: [
-        "system.identifier", "data.identifier",
-        "system.description.value", "data.description.value"
-      ]
-    }) ?? []));
-    classes = classes.flatMap(c => Array.from(c)).reduce((acc, c) => {
-      if (c.type !== "class") return acc;
-      const id = c.system?.identifier ?? c.data?.identifier;
-      if (!id || acc.set.has(id)) {
-        console.warn(`Missing or duplicate class identifier found. The class '${c.name}' with uuid '${c.uuid}' was skipped.`);
-        return acc;
-      }
-      acc.classes.push(c);
-      acc.set.add(id);
-      return acc;
-    }, {set: new Set(), classes: []}).classes.sort(nameSort);
-    const defaultIdentifier = classes[0]?.system.identifier ?? classes[0]?.data.identifier;
-    const identifier = options.classIdentifier ?? defaultIdentifier;
-    const cls = classes.find(c => (c.system?.identifier ?? c.data?.identifier) === identifier) ?? classes[0];
-
-    if (!cls) return {};
-
-    // Find all its subclasses.
-    const subclassPacks = game.settings.get(ClassPages.MODULE, "subclasses-packs") ?? [];
-    let subclasses = await Promise.all(subclassPacks.map(p => game.packs.get(p)?.getIndex({
-      fields: [
-        "system.classIdentifier", "data.classIdentifier",
-        "system.description.value", "data.description.value"
-      ]
-    }) ?? []));
-    subclasses = subclasses.flatMap(s => Array.from(s)).filter(s => {
-      if (s.type !== "subclass") return false;
-      return (s.system?.classIdentifier ?? s.data?.classIdentifier) === identifier;
-    }).sort(nameSort);
-
-    // Find all its spells.
-    const spellPacks = game.settings.get(ClassPages.MODULE, "spells-packs") ?? [];
-    let spells = await Promise.all(spellPacks.map(p => game.packs.get(p)?.getIndex({
-      fields: [
-        "system.school", "data.school",
-        "system.level", "data.level"
-      ]
-    }) ?? []));
-    const spellUuids = game.settings.get(ClassPages.MODULE, "spell-lists")?.[identifier] ?? [];
-    spells = spells.flatMap(s => Array.from(s)).filter(s => (s.type === "spell") && spellUuids.includes(s.uuid));
-    spells.sort(nameSort);
-
-    // Construct data object.
-    const data = {
-      class: await this._enrichData(cls),
-      identifier: identifier,
-      subclasses: await Promise.all(subclasses.map(s => this._enrichData(s))),
-      spells: await Promise.all(spells.map(s => this._enrichData(s, false))),
-      classes: this.classes = classes // used by subapps
-    };
-
-    // Create spell lists for this class.
-    data.spells = data.spells.reduce((acc, spell) => {
-      const level = spell.system?.level ?? spell.data?.level;
-      if (!Number.isNumeric(level)) return acc;
-      if (!(level in CONFIG.DND5E.spellLevels)) return acc;
-      acc[level] ??= {
-        level: level,
-        label: CONFIG.DND5E.spellLevels[level],
-        spells: []
-      };
-      acc[level].spells.push(spell);
-      return acc;
-    }, {});
-    data.spells = Object.values(data.spells).sort((a, b) => Number(a.level) - Number(b.level));
-
-    // Get subclass label.
-    const hasi18n = foundry.utils.getProperty(game.i18n.translations, `CLASS_PAGES.SubclassLabel${identifier.capitalize()}`);
-    data.subclassLabel = hasi18n ? game.i18n.localize(hasi18n) : game.settings.get(ClassPages.MODULE, "subclass-labels")?.[identifier] ?? "Subclass";
-
-    // Get backdrops for this class and all other classes.
-    const backdrops = game.settings.get(ClassPages.MODULE, "class-backdrops") ?? {};
-    data.backdrop = backdrops[identifier] ?? false;
-    for (const c of classes) c.identifier = c.system?.identifier ?? c.data?.identifier;
-
-    return data;
-  }
-
-  /**
-   * Utility function to batch construct and enrich an index entry.
-   * @param {object} idx                      One entry from a compendium's index.
-   * @param {boolean} [description=true]      Enrich the description?
-   * @returns {Promise<object>}               A different object with more data.
-   */
-  async _enrichData(idx, description = true) {
-    const [_, scope, key] = idx.uuid.split(".");
-    const pack = `${scope}.${key}`;
-    const desc = description ? await TextEditor.enrichHTML(idx.system?.description?.value ?? idx.data?.description?.value ?? "", {async: true}) : null;
-    return {...idx, id: idx._id, desc, pack};
-  }
-
-  /** @override */
-  async render(force = false, options = {}) {
-    this.options.classIdentifier ??= options.classIdentifier ?? null;
-    this.options.subtab ??= options.subtab ?? null;
-    return super.render(force, options);
-  }
+  /* -------------------------------------- */
+  /*                                        */
+  /*             STATIC METHODS             */
+  /*                                        */
+  /* -------------------------------------- */
 
   /**
    * Render this application.
@@ -245,20 +330,6 @@ class ClassPages extends Application {
     const active = Object.values(ui.windows).find(w => w instanceof ClassPages);
     if (active) return active.render(false, {classIdentifier: initial, subtab});
     return new ClassPages().render(true, {classIdentifier: initial, subtab});
-  }
-
-  /** @override */
-  _getHeaderButtons() {
-    const buttons = super._getHeaderButtons();
-    if (game.user.isGM) {
-      buttons.unshift({
-        class: "class-pages-configuration",
-        icon: "fa-solid fa-cog",
-        onclick: () => new ClassPagesDialog(this.classes, this).render(true),
-        label: "CLASS_PAGES.Settings"
-      });
-    }
-    return buttons;
   }
 
   /** Initialize the module. */
@@ -299,7 +370,6 @@ class ClassPages extends Application {
 
 /* Utility dialog for rendering subapplications; spell list config, source config, art config, and download/upload. */
 class ClassPagesDialog extends Application {
-
   constructor(classes, pages) {
     super();
     this.classes = classes;
@@ -462,15 +532,16 @@ class ClassPagesLists extends FormApplication {
 
     const classes = {};
     for (const c of this.classes) {
-      const identifier = c.system?.identifier ?? c.data?.identifier ?? "";
-      const list = setting[identifier] ?? [];
-      classes[identifier] = {list, label: c.name};
+      const prog = c.system?.spellcasting?.progression ?? c.data?.spellcasting?.progression ?? "none";
+      c.prog = (prog !== "none") && (prog in CONFIG.DND5E.spellProgression);
+      const list = setting[c.identifier] ?? [];
+      classes[c.identifier] = {list, label: c.name, prog: c.prog};
     }
 
     const spells = [];
     for (const idx of index) {
       const spell = {...idx, classes: {}};
-      for (const c in classes) spell.classes[c] = classes[c].list.includes(idx.uuid);
+      for (const c in classes) spell.classes[c] = { has: classes[c].list.includes(idx.uuid), prog: classes[c].prog };
       spells.push(spell);
     }
 
