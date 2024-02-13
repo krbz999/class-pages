@@ -11,28 +11,10 @@
       "patreon": "https://patreon.com/zhell"
     }
   ],
-  "compatibility": {
-    "minimum": "11",
-    "verified": "11",
-    "maximum": "11"
-  },
-  "esmodules": [
-    "scripts/pages.mjs"
-  ],
-  "styles": [
-    "styles/pages.css"
-  ],
-  "relationships": {
-    "systems": [
-      {
-        "id": "dnd5e",
-        "type": "system",
-        "compatibility": {
-          "minimum": "2.3.0"
-        }
-      }
-    ]
-  },
+  "compatibility": {"minimum": "11", "verified": "11", "maximum": "11"},
+  "esmodules": ["scripts/pages.mjs"],
+  "styles": ["styles/pages.css"],
+  "relationships": {"systems": [{"id": "dnd5e", "type": "system", "compatibility": {"minimum": "3.0.0"}}]},
   "languages": [
     {
       "lang": "en",

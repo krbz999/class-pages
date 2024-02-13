@@ -1,4 +1,4 @@
-Interested in following along with development of any of my modules? Join the [Discord server](https://discord.gg/QAG8eWABGT). 
+Interested in following along with development of any of my modules? Join the [Discord server](https://discord.gg/QAG8eWABGT).
 
 Organize multiple compendiums of dnd5e classes, subclasses, and spells into one window where your players can see what is available to them.
 

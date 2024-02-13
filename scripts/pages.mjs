@@ -293,6 +293,7 @@ class ClassPages extends Application {
   async _onToggleItem(event) {
     const target = event.currentTarget;
     if (event.target.closest(".content-link, .item")) return;
+    if (target.classList.contains("expanding")) return;
     const expanded = target.classList.toggle("expanded");
     const uuid = target.dataset.uuid;
     if (!expanded) {
@@ -302,6 +303,7 @@ class ClassPages extends Application {
         summary.remove();
       }
     } else {
+      target.classList.add("expanding");
       const item = await fromUuid(uuid);
       const data = await item.getChatData();
       const div = document.createElement("DIV");
@@ -311,6 +313,7 @@ class ClassPages extends Application {
       target.after(div.firstElementChild);
       const elem = target.closest(".spell").querySelector(".item-summary");
       elem.style.height = `${elem.scrollHeight}px`;
+      target.classList.remove("expanding");
     }
   }
 
@@ -541,7 +544,10 @@ class ClassPagesLists extends FormApplication {
     const spells = [];
     for (const idx of index) {
       const spell = {...idx, classes: {}};
-      for (const c in classes) spell.classes[c] = { has: classes[c].list.includes(idx.uuid), prog: classes[c].prog };
+      for (const c in classes) spell.classes[c] = {
+        has: classes[c].list.includes(idx.uuid),
+        prog: classes[c].prog
+      };
       spells.push(spell);
     }
 
