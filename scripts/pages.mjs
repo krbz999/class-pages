@@ -59,9 +59,9 @@ class ClassPages extends Application {
   async getData(options = {}) {
     // Find the current class and filter out any duplicate classes.
     const classes = await this._getClasses();
-    const defaultIdentifier = classes[0]?.system.identifier ?? classes[0]?.data.identifier;
+    const defaultIdentifier = classes[0]?.system.identifier;
     const identifier = options.classIdentifier ?? defaultIdentifier;
-    const cls = classes.find(c => (c.system?.identifier ?? c.data?.identifier) === identifier) ?? classes[0];
+    const cls = classes.find(c => c.system?.identifier === identifier) ?? classes[0];
 
     if (!cls) return {};
 
@@ -103,15 +103,11 @@ class ClassPages extends Application {
   async _getClasses() {
     const classPacks = game.settings.get(ClassPages.MODULE, "classes-packs") ?? [];
     let classes = await Promise.all(classPacks.map(p => game.packs.get(p)?.getIndex({
-      fields: [
-        "system.identifier", "data.identifier",
-        "system.description.value", "data.description.value",
-        "system.spellcasting.progression", "data.spellcasting.progression"
-      ]
+      fields: ["system.identifier", "system.description.value", "system.spellcasting.progression"]
     }) ?? []));
     classes = classes.flatMap(c => Array.from(c)).reduce((acc, c) => {
       if (c.type !== "class") return acc;
-      const id = c.system?.identifier ?? c.data?.identifier;
+      const id = c.system?.identifier;
       if (!id || acc.set.has(id)) {
         console.warn(`Missing or duplicate class identifier found. The class '${c.name}' with uuid '${c.uuid}' was skipped.`);
         return acc;
@@ -132,14 +128,11 @@ class ClassPages extends Application {
   async _getSubclasses(identifier) {
     const subclassPacks = game.settings.get(ClassPages.MODULE, "subclasses-packs") ?? [];
     let subclasses = await Promise.all(subclassPacks.map(p => game.packs.get(p)?.getIndex({
-      fields: [
-        "system.classIdentifier", "data.classIdentifier",
-        "system.description.value", "data.description.value"
-      ]
+      fields: ["system.classIdentifier", "system.description.value"]
     }) ?? []));
     subclasses = subclasses.flatMap(s => Array.from(s)).filter(s => {
       if (s.type !== "subclass") return false;
-      return (s.system?.classIdentifier ?? s.data?.classIdentifier) === identifier;
+      return s.system?.classIdentifier === identifier;
     }).sort((a, b) => a.name.localeCompare(b.name));
     return Promise.all(subclasses.map(s => this._enrichData(s)));
   }
@@ -152,19 +145,16 @@ class ClassPages extends Application {
   async _getSpells(identifier) {
     const spellPacks = game.settings.get(ClassPages.MODULE, "spells-packs") ?? [];
     let spells = await Promise.all(spellPacks.map(p => game.packs.get(p)?.getIndex({
-      fields: [
-        "system.school", "data.school",
-        "system.level", "data.level"
-      ]
+      fields: ["system.school", "system.level"]
     }) ?? []));
     const spellUuids = game.settings.get(ClassPages.MODULE, "spell-lists")?.[identifier] ?? [];
     spells = spells.flatMap(s => Array.from(s)).filter(s => (s.type === "spell") && spellUuids.includes(s.uuid));
     spells.sort((a, b) => a.name.localeCompare(b.name));
     spells = await Promise.all(spells.map(s => this._enrichData(s, false)));
     spells = spells.reduce((acc, spell) => {
-      const level = spell.system?.level ?? spell.data?.level;
+      const level = spell.system?.level;
       if (!Number.isNumeric(level) || !(level in CONFIG.DND5E.spellLevels)) return acc;
-      const school = spell.system?.school ?? spell.data?.school;
+      const school = spell.system?.school;
       spell.level = level;
       spell.school = (school in CONFIG.DND5E.spellSchools) ? school : null;
       acc[level] ??= {level: level, label: CONFIG.DND5E.spellLevels[level], spells: []};
@@ -186,7 +176,7 @@ class ClassPages extends Application {
     const pack = `${scope}.${key}`;
     let desc = null;
     if (description) {
-      const value = idx.system?.description?.value ?? idx.data?.description?.value ?? "";
+      const value = idx.system?.description?.value ?? "";
       desc = await TextEditor.enrichHTML(value, {async: true});
     }
     return {...idx, id: idx._id, desc, pack};
@@ -523,7 +513,7 @@ class ClassPagesLists extends FormApplication {
   async getData() {
     const keys = game.settings.get(ClassPages.MODULE, "spells-packs") ?? [];
     const indices = await Promise.all(keys.map(key => game.packs.get(key)?.getIndex({
-      fields: ["system.school", "system.level", "data.school", "data.level"]
+      fields: ["system.school", "system.level"]
     })));
 
     const index = indices.reduce((acc, indice) => {
@@ -535,7 +525,7 @@ class ClassPagesLists extends FormApplication {
 
     const classes = {};
     for (const c of this.classes) {
-      const prog = c.system?.spellcasting?.progression ?? c.data?.spellcasting?.progression ?? "none";
+      const prog = c.system?.spellcasting?.progression ?? "none";
       c.prog = (prog !== "none") && (prog in CONFIG.DND5E.spellProgression);
       const list = setting[c.identifier] ?? [];
       classes[c.identifier] = {list, label: c.name, prog: c.prog};
@@ -689,7 +679,7 @@ class ClassPagesArtSettings extends FormApplication {
     const labels = game.settings.get(ClassPages.MODULE, "subclass-labels") ?? {};
     return {
       classes: this.classes.map(c => {
-        const id = c.system?.identifier ?? c.data?.identifier ?? "";
+        const id = c.system?.identifier ?? "";
         return {
           id: id,
           name: c.name,
